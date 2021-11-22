@@ -1,17 +1,48 @@
-name: Basic Workflow
+name: Workflow with ENV variables
 
-on:
-  push:
-  # schedule:
-  #   - cron: "*/5 * * * *"
-  repository_dispatch:
-    types: [build]
+on: [push]
+
+env:
+  WORKFLOW_ENV: Available to all jobs
 
 jobs:
-  run-shell-commands:
+  log-default-environment-variables:
     runs-on: ubuntu-latest
     steps:
-      - name: Echo a string
-        run: echo "Hello World"
-      - name: Echo message from event payload
-        run: echo ${{ github.event.client_payload.message }}
+      - name: Log default environment variables
+        run: |
+          echo "HOME: ${HOME}"
+          echo "GITHUB_WORKFLOW: ${GITHUB_WORKFLOW}"
+          echo "GITHUB_ACTION: ${GITHUB_ACTION}"
+          echo "GITHUB_ACTIONS: ${GITHUB_ACTIONS}"
+          echo "GITHUB_ACTOR: ${GITHUB_ACTOR}"
+          echo "GITHUB_REPOSITORY: ${GITHUB_REPOSITORY}"
+          echo "GITHUB_EVENT_NAME: ${GITHUB_EVENT_NAME}"
+          echo "GITHUB_WORKSPACE: ${GITHUB_WORKSPACE}"
+          echo "GITHUB_SHA: ${GITHUB_SHA}"
+          echo "GITHUB_REF: ${GITHUB_REF}"
+  log-environment-variables:
+    runs-on: ubuntu-latest
+    env:
+      JOB_ENV: Available to all steps of this jobs
+    steps:
+      - name: Log environment variables
+        env:
+          STEP_ENV: Available to this step
+        run: |
+          echo "WORKFLOW_ENV: ${WORKFLOW_ENV}"
+          echo "JOB_ENV: ${JOB_ENV}"
+          echo "STEP_ENV: ${STEP_ENV}"
+  use-secret-variables:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Create an issue using API
+        run: |
+          curl --request POST \
+          --url https://api.github.com/repos/${GITHUB_REPOSITORY}/issues \
+          --header 'authorization: Bearer ${{ secrets.GH_PERSONAL_TOKEN }}' \
+          --header 'content-type: application/json' \
+          --data '{
+            "title": "Issue for commit: ${{ github.sha }}",
+            "body": "This issue was automatically created by the GitHub Action workflow **${{ github.workflow }}**. \n\n The commit hash was: _${{ github.sha }}_."
+            }'
