@@ -1,11 +1,14 @@
-name: Basic Workflow
+name: Workflow with Filters
 
 on:
   push:
-  schedule:
-    - cron: "*/5 * * * *"
-  repository_dispatch:
-    types: [build]
+    branches:
+      - master
+      - 0*-*
+    tags:
+      - v*
+    paths:
+      - "**.js"
 
 jobs:
   run-shell-commands:
@@ -13,5 +16,3 @@ jobs:
     steps:
       - name: Echo a string
         run: echo "Hello World"
-      - name: Echo message from event payload
-        run: echo ${{ github.event.client_payload.message }}
