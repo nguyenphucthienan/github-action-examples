@@ -2,9 +2,13 @@ name: Deploy Workflow
 
 on: [push]
 
+env:
+  CI: true
+
 jobs:
   build:
     runs-on: ubuntu-latest
+    container: node:16-alpine3.12
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -13,10 +17,6 @@ jobs:
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-      - name: Setup Node
-        uses: actions/setup-node@v2
-        with:
-          node-version: "16"
       - run: npm ci
       - name: Build Project
         run: npm run build
@@ -28,6 +28,7 @@ jobs:
   test:
     needs: [build]
     runs-on: ubuntu-latest
+    container: node:16-alpine3.12
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -36,14 +37,12 @@ jobs:
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-      - name: Setup Node
-        uses: actions/setup-node@v2
-        with:
-          node-version: "16"
+      - name: Install Chromium
+        run: apk add chromium
       - run: npm ci
       - run: npm run test:ci
         env:
-          CI: true
+          CHROME_BIN: '/usr/bin/chromium-browser'
       - name: Upload Test Coverage
         uses: actions/upload-artifact@v2
         with:
@@ -52,9 +51,11 @@ jobs:
   deploy:
     needs: [test]
     runs-on: ubuntu-latest
+    container: node:16-alpine3.12
     env:
       SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
       SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+      DEPLOY_DOMAIN: github-actions-lni-demo.surge.sh
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -63,14 +64,9 @@ jobs:
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-      - name: Setup Node
-        uses: actions/setup-node@v2
-        with:
-          node-version: "16"
-      - run: npm ci
       - uses: actions/download-artifact@v2
         with:
           name: build
           path: dist
       - name: Deploy
-        run: npx surge --project ./dist/angular --domain github-actions-lni-demo.surge.sh
+        run: npx surge --project ./dist/angular --domain ${{ env.DEPLOY_DOMAIN }}
