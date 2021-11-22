@@ -1,18 +1,12 @@
-name: Basic Workflow
+name: Workflow with Docker Containers
 
-on:
-  push:
-  # schedule:
-  #   - cron: "*/5 * * * *"
-  workflow_dispatch:
-  repository_dispatch:
-    types: [build]
+on: [push]
 
 jobs:
-  run-shell-commands:
+  run-jdk-docker:
     runs-on: ubuntu-latest
+    container:
+      image: openjdk:11
     steps:
-      - name: Echo a string
-        run: echo "Hello World"
-      - name: Echo message from event payload
-        run: echo ${{ github.event.client_payload.message }}
+      - name: Log Java version
+        run: javac --version
