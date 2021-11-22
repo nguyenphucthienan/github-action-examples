@@ -2,9 +2,6 @@ name: Deploy Workflow
 
 on: [push]
 
-env:
-  CI: true
-
 jobs:
   build:
     runs-on: ubuntu-latest
@@ -12,15 +9,18 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Cache node-modules folder
+      - name: Install tar
+        run: apk add tar
+      - name: Cache node-modules
         uses: actions/cache@v2
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-      - run: npm ci
-      - name: Build Project
+      - name: Install dependencies
+        run: npm install
+      - name: Build project
         run: npm run build
-      - name: Upload Build Folder
+      - name: Upload build artifacts
         uses: actions/upload-artifact@v2
         with:
           name: build
@@ -32,18 +32,22 @@ jobs:
     steps:
       - name: Checkout
         uses: actions/checkout@v2
-      - name: Cache node-modules folder
+      - name: Install tar
+        run: apk add tar
+      - name: Cache node-modules
         uses: actions/cache@v2
         with:
           path: "**/node_modules"
           key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-      - name: Install Chromium
+      - name: Install chromium
         run: apk add chromium
-      - run: npm ci
-      - run: npm run test:ci
+      - name: Install dependencies
+        run: npm install
+      - name: Run unit tests
         env:
-          CHROME_BIN: '/usr/bin/chromium-browser'
-      - name: Upload Test Coverage
+          CHROME_BIN: "/usr/bin/chromium-browser"
+        run: npm run test:ci
+      - name: Upload test coverage
         uses: actions/upload-artifact@v2
         with:
           name: code-coverage
@@ -57,16 +61,10 @@ jobs:
       SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
       DEPLOY_DOMAIN: github-actions-lni-demo.surge.sh
     steps:
-      - name: Checkout
-        uses: actions/checkout@v2
-      - name: Cache node-modules folder
-        uses: actions/cache@v2
-        with:
-          path: "**/node_modules"
-          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
-      - uses: actions/download-artifact@v2
+      - name: Download build artifacts
+        uses: actions/download-artifact@v2
         with:
           name: build
           path: dist
-      - name: Deploy
+      - name: Deploy to Surge
         run: npx surge --project ./dist/angular --domain ${{ env.DEPLOY_DOMAIN }}
