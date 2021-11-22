@@ -1,14 +1,15 @@
-name: Basic Workflow
+name: Use a Simple Action
 
 on: [push]
 
 jobs:
-  run-shell-commands:
+  run-github-actions:
     runs-on: ubuntu-latest
     steps:
-      - name: Echo a string
-        run: echo "Hello World"
-      - name: Run multiline commands
-        run: |
-          node -v
-          npm -v
+      - name: Run HelloWorld action
+        id: hello-action
+        uses: actions/hello-world-javascript-action@v1
+        with:
+          who-to-greet: Lexis Nexis
+      - name: Log hello time
+        run: echo "${{ steps.hello-action.outputs.time }}"
