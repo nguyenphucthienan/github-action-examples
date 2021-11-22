@@ -5,9 +5,29 @@ on: [push]
 jobs:
   build:
     runs-on: ubuntu-latest
-    env:
-      SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
-      SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Cache node-modules folder
+        uses: actions/cache@v2
+        with:
+          path: "**/node_modules"
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+      - run: npm ci
+      - name: Build Project
+        run: npm run build
+      - name: Upload Build Folder
+        uses: actions/upload-artifact@v2
+        with:
+          name: build
+          path: dist
+  test:
+    needs: [build]
+    runs-on: ubuntu-latest
     steps:
       - name: Checkout
         uses: actions/checkout@v2
@@ -29,13 +49,28 @@ jobs:
         with:
           name: code-coverage
           path: coverage
-      - name: Build Project
-        run: npm run build
-      - name: Upload Build Folder
-        uses: actions/upload-artifact@v2
+  deploy:
+    needs: [test]
+    runs-on: ubuntu-latest
+    env:
+      SURGE_LOGIN: ${{ secrets.SURGE_LOGIN }}
+      SURGE_TOKEN: ${{ secrets.SURGE_TOKEN }}
+    steps:
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Cache node-modules folder
+        uses: actions/cache@v2
         with:
-          name: dist
-          path: dist
+          path: "**/node_modules"
+          key: ${{ runner.os }}-node-${{ hashFiles('**/package-lock.json') }}
+      - name: Setup Node
+        uses: actions/setup-node@v2
+        with:
+          node-version: "16"
+      - run: npm ci
       - uses: actions/download-artifact@v2
+        with:
+          name: build
+          path: dist
       - name: Deploy
         run: npx surge --project ./dist/angular --domain github-actions-lni-demo.surge.sh
