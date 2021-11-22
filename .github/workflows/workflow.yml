@@ -1,18 +1,17 @@
-name: Basic Workflow
+name: Workflow with Matrix
 
-on:
-  push:
-  # schedule:
-  #   - cron: "*/5 * * * *"
-  workflow_dispatch:
-  repository_dispatch:
-    types: [build]
+on: [push]
 
 jobs:
-  run-shell-commands:
-    runs-on: ubuntu-latest
+  log-node-version:
+    strategy:
+      matrix:
+        os: [ubuntu-latest, windows-latest, macos-latest]
+        node_version: [8, 10, 12]
+    runs-on: ${{ matrix.os }}
     steps:
-      - name: Echo a string
-        run: echo "Hello World"
-      - name: Echo message from event payload
-        run: echo ${{ github.event.client_payload.message }}
+      - name: Log node version
+        run: node -v
+      - uses: actions/setup-node@v1
+        with:
+          node-version: ${{ matrix.node_version }}
