@@ -1,6 +1,11 @@
-name: Basic Workflow
+name: Workflow with Events
 
-on: [push]
+on: 
+  push:
+    branches:
+      - 03-trigger-workflows-with-events
+  pull_request:
+    types: [opened, closed, reopened, assigned]
 
 jobs:
   run-shell-commands:
@@ -8,18 +13,3 @@ jobs:
     steps:
       - name: Echo a string
         run: echo "Hello World"
-      - name: Run multiline commands
-        run: |
-          pwd
-          node -v
-          npm -v
-      - name: Run Python Command
-        run: |
-          import platform 
-          print(platform.python_version())
-        shell: python
-  run-windows-commands:
-    runs-on: windows-latest
-    steps:
-      - name: Run Powershell command
-        run: Get-Location
