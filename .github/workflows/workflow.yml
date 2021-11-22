@@ -1,18 +1,17 @@
 name: Basic Workflow
 
-on:
-  push:
-  # schedule:
-  #   - cron: "*/5 * * * *"
-  workflow_dispatch:
-  repository_dispatch:
-    types: [build]
+on: [push]
 
 jobs:
-  run-shell-commands:
+  hello:
     runs-on: ubuntu-latest
     steps:
-      - name: Echo a string
-        run: echo "Hello World"
-      - name: Echo message from event payload
-        run: echo ${{ github.event.client_payload.message }}
+      - name: Checkout
+        uses: actions/checkout@v2
+      - name: Use Hello action
+        uses: ./.github/actions/hello
+        id: hello
+        with:
+          who-to-greet: "Lexis Nexis"
+      - name: Log hello time
+        run: 'echo "Time: ${{ steps.hello.outputs.time }}"'
