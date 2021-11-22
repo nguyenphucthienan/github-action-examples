@@ -1,25 +1,31 @@
-name: Basic Workflow
+name: Use Checkout Action
 
 on: [push]
 
 jobs:
-  run-shell-commands:
+  list-files-without-using-action:
     runs-on: ubuntu-latest
     steps:
-      - name: Echo a string
-        run: echo "Hello World"
-      - name: Run multiline commands
+      - name: Checkout
+        run: |
+          git init
+          git remote add origin "https://$GITHUB_ACTOR:${{ secrets.GITHUB_TOKEN }}@github.com/$GITHUB_REPOSITORY.git"
+          git config --global user.email "npta97@gmail.com"
+          git config --global user.name "An Phuc Thien Nguyen"
+          git fetch
+          git checkout $GITHUB_SHA
+      - name: List files after checkout
         run: |
           pwd
-          node -v
-          npm -v
-      - name: Run Python Command
-        run: |
-          import platform 
-          print(platform.python_version())
-        shell: python
-  run-windows-commands:
-    runs-on: windows-latest
+          ls -a
+          cat hello-world.txt
+  list-files-using-checkout-action:
+    runs-on: ubuntu-latest
     steps:
-      - name: Run Powershell command
-        run: Get-Location
+      - name: Checkout 
+        uses: actions/checkout@v2
+      - name: List files after checkout
+        run: |
+          pwd
+          ls -a
+          cat hello-world.txt
