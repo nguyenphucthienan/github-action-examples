@@ -1,6 +1,11 @@
 name: Basic Workflow
 
-on: [push]
+on:
+  push:
+  # schedule:
+  #   - cron: "*/5 * * * *"
+  repository_dispatch:
+    types: [build]
 
 jobs:
   run-shell-commands:
@@ -8,18 +13,5 @@ jobs:
     steps:
       - name: Echo a string
         run: echo "Hello World"
-      - name: Run multiline commands
-        run: |
-          pwd
-          node -v
-          npm -v
-      - name: Run Python Command
-        run: |
-          import platform 
-          print(platform.python_version())
-        shell: python
-  run-windows-commands:
-    runs-on: windows-latest
-    steps:
-      - name: Run Powershell command
-        run: Get-Location
+      - name: Echo message from event payload
+        run: echo ${{ github.event.client_payload.message }}
