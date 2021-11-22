@@ -1,6 +1,9 @@
-name: Basic Workflow
+name: Workflow with Events
 
-on: [push]
+on:
+  push:
+  pull_request:
+    types: [opened, closed, reopened, assigned]
 
 jobs:
   run-shell-commands:
