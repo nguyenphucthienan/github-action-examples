@@ -1,0 +1,25 @@
+name: Basic Workflow
+
+on: [push]
+
+jobs:
+  run-shell-commands:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Echo a string
+        run: echo "Hello World"
+      - name: Run multiline commands
+        run: |
+          pwd
+          node -v
+          npm -v
+      - name: Run Python Command
+        run: |
+          import platform 
+          print(platform.python_version())
+        shell: python
+  run-windows-commands:
+    runs-on: windows-latest
+    steps:
+      - name: Run Powershell command
+        run: Get-Location
