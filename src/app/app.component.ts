@@ -7,5 +7,5 @@ import { Component } from '@angular/core';
 })
 export class AppComponent {
   title = 'Github Actions Demo';
-  subtitle = "OMP Project"
+  subtitle = "LNI Project"
 }
