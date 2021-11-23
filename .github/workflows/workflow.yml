@@ -10,3 +10,4 @@ jobs:
     steps:
       - name: Log Java version
         run: javac --version
+
