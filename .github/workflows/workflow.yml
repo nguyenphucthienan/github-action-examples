@@ -46,3 +46,4 @@ jobs:
             "title": "Issue for commit: ${{ github.sha }}",
             "body": "This issue was automatically created by the GitHub Action workflow **${{ github.workflow }}**. \n\n The commit hash was: _${{ github.sha }}_."
             }'
+
