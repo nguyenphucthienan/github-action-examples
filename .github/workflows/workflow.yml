@@ -27,3 +27,4 @@ jobs:
           who-to-greet: "Lexis Nexis"
       - name: Log hello time
         run: 'echo "Time: ${{ steps.hello.outputs.time }}"'
+
